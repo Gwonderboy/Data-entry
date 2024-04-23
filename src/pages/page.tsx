@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   FormControl,
@@ -7,8 +7,8 @@ import {
   Select,
   Button,
 } from "@chakra-ui/react";
-import axios from "../api/axios";
 import Dashboard from "./dashboard";
+import { fetchProductCategories, submitOrder } from "../api/api";
 
 const DataEntryForm: React.FC = () => {
   const [customerName, setCustomerName] = useState("");
@@ -16,6 +16,16 @@ const DataEntryForm: React.FC = () => {
   const [productCategory, setProductCategory] = useState("");
   const [price, setPrice] = useState("");
   const [orderDate, setOrderDate] = useState("");
+  // const [categories, setCategories] = useState<string[]>([]);
+
+  // useEffect(() => {
+  //    fetchCategories();
+  // }, []);
+
+  // const fetchCategories = async () => {
+  //   const categories = await fetchProductCategories();
+  //   setCategories(categories);
+  // };
 
   const handleCustomerNameChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -49,8 +59,7 @@ const DataEntryForm: React.FC = () => {
     event.preventDefault();
 
     try {
-      // Send form data to the backend API endpoint
-      const response = await axios.post("/api/submitOrder", {
+      await submitOrder({
         customerName,
         productName,
         productCategory,
@@ -58,20 +67,26 @@ const DataEntryForm: React.FC = () => {
         orderDate,
       });
 
-      console.log("Order submitted successfully:", response.data);
+      console.log("Order submitted successfully");
 
       setCustomerName("");
       setProductName("");
       setProductCategory("");
       setPrice("");
       setOrderDate("");
-    } catch (error) {
-      console.error("Error submitting order:", error);
+    } catch (error: any) {
+      console.error("Error submitting order:", error.message);
     }
   };
 
   return (
-    <Box w="full" backgroundColor="#EEEEEE" display="flex" flexDir={"column"} p={"2rem"}>
+    <Box
+      w="full"
+      backgroundColor="#EEEEEE"
+      display="flex"
+      flexDir={"column"}
+      p={"2rem"}
+    >
       <form onSubmit={handleSubmit} className="form">
         <FormControl>
           <FormLabel>Customer Name:</FormLabel>
@@ -97,7 +112,13 @@ const DataEntryForm: React.FC = () => {
             className="input"
             value={productCategory}
             onChange={handleProductCategoryChange}
-          ></Select>
+          >
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </Select>
         </FormControl>
         <FormControl>
           <FormLabel>Price:</FormLabel>
@@ -125,6 +146,7 @@ const DataEntryForm: React.FC = () => {
           p="1rem"
           width="10rem"
           borderRadius="2rem"
+          cursor="pointer"
         >
           Submit
         </Button>
@@ -136,3 +158,11 @@ const DataEntryForm: React.FC = () => {
 };
 
 export default DataEntryForm;
+
+const categories = [
+  { id: "1", name: "Electronics" },
+  { id: "2", name: "Clothing" },
+  { id: "3", name: "Books" },
+  { id: "4", name: "Home & Garden" },
+  { id: "5", name: "Health & Beauty" },
+];
